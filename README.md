@@ -98,7 +98,7 @@ dotnet test SPS.Domain.Tests
 
 All request/response examples can be found inside Swagger.
 
-##  Design Decisions (Why I Chose This)
+##  Design Decisions 
 
 ### 1. Invoice belongs to the Subscription Aggregate
 An invoice cannot exist without a subscription, and paying an invoice must be done through the subscription to enforce that an invoice is not paid twice. That’s why `Subscription` is the aggregate root and has a method `PayInvoice(invoiceId)`, not the other way around.
@@ -106,7 +106,7 @@ An invoice cannot exist without a subscription, and paying an invoice must be do
 ### 2. Outbox Pattern instead of direct MediatR publish
 In a real production system, if I dispatched domain events inside the `DbContext.SaveChangesAsync` and the transaction failed, we could publish an event that never actually persisted. The Outbox pattern guarantees that events are stored atomically with the domain changes and published *after* the commit. This makes the system much more reliable.
 
-### 3. Idempotent Commands (Bonus)
+### 3. Idempotent Commands 
 When external systems (like payment gateways) send commands, they might retry them. To avoid double-payment or duplicate subscriptions, I added an `IdempotentCommandBehavior` that caches the response based on a unique `IdempotencyKey`. If the same key comes again, the cached result is returned without re-executing the handler.
 
 ### 4. Background Billing Service as a `BackgroundService`
@@ -114,22 +114,3 @@ I chose a simple `BackgroundService` that runs in the same process for simplicit
 
 ### 5. Soft Deletes & Auditing
 The domain entities implement `ISoftDeletable` and `IAuditableEntity`, and an EF Core interceptor automatically sets audit fields — a technique I've used in government projects to track all data changes.
-
-##  Future Improvements (If I had more time)
-- Add integration tests with a test database.
-- Replace the in-memory Outbox with a transactional outbox using the database itself.
-- Make the `BillingCycleService` run as a cron job (e.g., every day at midnight).
-- Add a simple frontend (Blazor or React) to visualize subscriptions and invoices.
-- Dockerize the whole application.
-
-##  Contact
-
-- **Youssef Mohamed**
--  [youssefselem14@gmail.com](mailto:youssefselem14@gmail.com)
--  [LinkedIn](https://www.linkedin.com/in/youssef-mohamed-50882828b/)
--  [GitHub](https://github.com/Youssef2112003)
-
----
-
-**Built with passion for clean code and solid architecture.** 
-```
